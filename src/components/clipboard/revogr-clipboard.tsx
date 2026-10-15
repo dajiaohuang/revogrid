@@ -201,15 +201,40 @@ export class Clipboard {
   }
 
   parserCopy(data: DataFormat[][]) {
-    return data.map(rgRow => rgRow.join('\t')).join('\n');
+    return data.map(rgRow => rgRow.map(value => {
+      const text = [value].join('');
+      return /[\t\r\n"]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }).join('\t')).join('\n');
   }
 
   private textParse(data: string) {
     const result: string[][] = [];
-    const rows = data.split(/\r\n|\n|\r/);
-    for (let y in rows) {
-      result.push(rows[y].split('\t'));
+    let row: string[] = [];
+    let field = '';
+    let quoted = false;
+    for (let i = 0; i < data.length; i++) {
+      const char = data[i];
+      if (char === '"' && (quoted || field.length === 0)) {
+        if (quoted && data[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          quoted = !quoted;
+        }
+      } else if (!quoted && (char === '\t' || char === '\r' || char === '\n')) {
+        row.push(field);
+        field = '';
+        if (char !== '\t') {
+          result.push(row);
+          row = [];
+          if (char === '\r' && data[i + 1] === '\n') i++;
+        }
+      } else {
+        field += char;
+      }
     }
+    row.push(field);
+    result.push(row);
     return result;
   }
 
