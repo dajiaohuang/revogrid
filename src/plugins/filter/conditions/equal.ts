@@ -5,7 +5,7 @@ const eq: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctionExtra
     return true;
   }
   if (typeof value !== 'string') {
-    value = JSON.stringify(value);
+    value = typeof value === 'bigint' ? value.toString() : JSON.stringify(value);
   }
 
   const filterVal = extra?.toString().toLocaleLowerCase();

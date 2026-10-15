@@ -9,7 +9,7 @@ const contains: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctio
   }
   if (extra) {
     if (typeof value !== 'string') {
-      value = JSON.stringify(value);
+      value = typeof value === 'bigint' ? value.toString() : JSON.stringify(value);
     }
     return value.toLocaleLowerCase().indexOf(extra.toString().toLowerCase()) > -1;
   }
